@@ -9,7 +9,6 @@
 #################### import libraries and set options ####################
 library(optparse)
 library(multiHiCcompare)
-#library(magrittr)
 library(BiocParallel)
 #
 options(scipen = 10)
@@ -40,6 +39,12 @@ the.hicexp <- readRDS(file = opt$input)
 # probably would be good to add covars if they exist
 modelmat <- model.matrix(~factor(meta(the.hicexp)$group))
 #
+###################### figure out groups ############################
+samples <- meta(the.hicexp)
+
+unique(samples$group)
+
+
 ########################## perform glm ##############################
 # Now, we've got different tests we want to perform... 
 
