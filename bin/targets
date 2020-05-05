@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# USAGE:
+# bin/targets
+
+find -L data/ \
+	-type f \
+	-name "*.cycnorm.hicexp.Rds" \
+| sed -r \
+	-e 's#^data/#results/#' \
+	-e 's#.cycnorm.hicexp.Rds$#.glm.cycnorm.hicexp.Rds#'
+
