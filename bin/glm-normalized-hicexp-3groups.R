@@ -17,6 +17,7 @@ cores = parallel::detectCores()
 register(MulticoreParam(workers = cores - 2), default = TRUE)
 #
 ########################## functions ###################################
+# it's dangerous to go alone! take this.
 hic_glm_3groups <- function(g) {
   
   if(length(g) == 1) {
@@ -39,17 +40,18 @@ option_list = list(
               type = "character", 
               help = "output filepath for the glm-ed hicexp object")
 )
-
+#
 opt <- parse_args(OptionParser(option_list=option_list))
-
+#
+### check the hicexp parameter is not empty
 if (is.null(opt$input)){
   print_help(OptionParser(option_list=option_list))
   stop("The normalized hicexp input file is mandatory.n", call.=FALSE)
 }
-
+#
 the.hicexp <- readRDS(file = opt$input)
 #
-############### check it's actually 3 groups #######################
+### check the hicesp actually has 3 groups 
 if (nlevels(meta(the.hicexp)$group) != 3) {
   stop("The normalized hicexp input file should contain 3 groups of samples.n", call.=FALSE)
 }
@@ -75,13 +77,11 @@ the.hicexp.groups <- levels(meta(the.hicexp)$group)
 #
 names(qlf.hicexp.list) <- c(paste("qlf", the.hicexp.groups[2], the.hicexp.groups[1], sep = "."),
                             paste("qlf", the.hicexp.groups[3], the.hicexp.groups[1], sep = "."),
-                            paste("qlf", the.hicexp.groups[3], the.hicexp.groups[1], sep = ".")
+                            paste("qlf", the.hicexp.groups[3], the.hicexp.groups[2], sep = ".")
                           )
 #
 ########################## perform glms #############################
-
-
-# should we output a list of qlf hicexp?
+qlf.hicexp.list <- lapply(qlf.hicexp.list, FUN = hic_glm_3groups)
 
 ################ save qlf hicexp ################
-saveRDS(the.hicexp, file = opt$output)
+saveRDS(qlf.hicexp.list, file = opt$output)
