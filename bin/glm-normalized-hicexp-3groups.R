@@ -16,6 +16,20 @@ options(scipen = 10)
 cores = parallel::detectCores()
 register(MulticoreParam(workers = cores - 2), default = TRUE)
 #
+########################## functions ###################################
+hic_glm_3groups <- function(g) {
+  
+  if(length(g) == 1) {
+    out <- hic_glm(hicexp = the.hicexp, design = modelmat, coef = g,
+                   method = "QLFTest", p.method = "fdr", parallel = TRUE)
+  } else {
+    out <- hic_glm(hicexp = the.hicexp, design = modelmat, contrast = g,
+                   method = "QLFTest", p.method = "fdr", parallel = TRUE)
+  }
+  
+  return(out)
+}
+# 
 ########################## read in data ###################################
 option_list = list(
   make_option(opt_str = c("-i", "--input"), 
@@ -35,40 +49,36 @@ if (is.null(opt$input)){
 
 the.hicexp <- readRDS(file = opt$input)
 #
-############### check it's actually 3 groups ########################
+############### check it's actually 3 groups #######################
 if (nlevels(meta(the.hicexp)$group) != 3) {
   stop("The normalized hicexp input file should contain 3 groups of samples.n", call.=FALSE)
 }
 #
-###################### infer model matrix ###########################
+###################### infer model matrix ##########################
 # probably would be good to add covars if they exist
 modelmat <- model.matrix(~factor(meta(the.hicexp)$group))
 #
-###################### figure out groups ############################
+###################### prepare qlf list ############################
+# group2 vs group1 coefficient
+#
+# group3 vs group1 coefficient
+#
+# group3 vs group2 contrast 
+# from edgeR documentation "The contrast argument in this case requests 
+# a statistical test of the null hypothesis that coefficient3−coefficient2 
+# is equal to zero."
+#
+qlf.hicexp.list <- list(2, 3, c(0, -1, 1))
+#
+#figure out groups
 the.hicexp.groups <- levels(meta(the.hicexp)$group)
-
-qlf <- list(2, 3, c(0, -1, 1))
-
 #
-########################## perform glms ##############################
-# group2 vs group1
-# group3 vs group1
-# group3 vs group2
-
-#The contrast argument in this case requests a statistical test of the null hypothesis that
-#coefficient3−coefficient2 is equal to zero.
-
-
-
-qlf.MCF10AT1.MCF10A <- hic_glm(the.hicexp, design = modelmat, coef = 2,
-                   method = "QLFTest", p.method = "fdr", parallel = TRUE)
-
-
-
+names(qlf.hicexp.list) <- c(paste("qlf", the.hicexp.groups[2], the.hicexp.groups[1], sep = "."),
+                            paste("qlf", the.hicexp.groups[3], the.hicexp.groups[1], sep = "."),
+                            paste("qlf", the.hicexp.groups[3], the.hicexp.groups[1], sep = ".")
+                          )
 #
-
-qlf.MCF10CA1A.MCF10A <- hic_glm(the.hicexp, design = modelmat, coef = 3,
-                                method = "QLFTest", p.method = "fdr", parallel = TRUE)
+########################## perform glms #############################
 
 
 # should we output a list of qlf hicexp?
