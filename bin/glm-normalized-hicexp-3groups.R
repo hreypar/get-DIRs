@@ -35,24 +35,34 @@ if (is.null(opt$input)){
 
 the.hicexp <- readRDS(file = opt$input)
 #
+############### check it's actually 3 groups ########################
+if (nlevels(meta(the.hicexp)$group) != 3) {
+  stop("The normalized hicexp input file should contain 3 groups of samples.n", call.=FALSE)
+}
+#
 ###################### infer model matrix ###########################
 # probably would be good to add covars if they exist
 modelmat <- model.matrix(~factor(meta(the.hicexp)$group))
 #
 ###################### figure out groups ############################
-samples <- meta(the.hicexp)
+the.hicexp.groups <- levels(meta(the.hicexp)$group)
 
-unique(samples$group)
+qlf <- list(2, 3, c(0, -1, 1))
+
+#
+########################## perform glms ##############################
+# group2 vs group1
+# group3 vs group1
+# group3 vs group2
+
+#The contrast argument in this case requests a statistical test of the null hypothesis that
+#coefficient3−coefficient2 is equal to zero.
 
 
-########################## perform glm ##############################
-# Now, we've got different tests we want to perform... 
 
 qlf.MCF10AT1.MCF10A <- hic_glm(the.hicexp, design = modelmat, coef = 2,
                    method = "QLFTest", p.method = "fdr", parallel = TRUE)
 
-# filtering is being moved to a different module anyway
-top.qlf.MCF10AT1.MCF10A <- topDirs(qlf.MCF10AT1.MCF10A, return_df = "pairedbed", p.adj_cutoff = 0.05)
 
 
 #
@@ -60,7 +70,6 @@ top.qlf.MCF10AT1.MCF10A <- topDirs(qlf.MCF10AT1.MCF10A, return_df = "pairedbed",
 qlf.MCF10CA1A.MCF10A <- hic_glm(the.hicexp, design = modelmat, coef = 3,
                                 method = "QLFTest", p.method = "fdr", parallel = TRUE)
 
-top.qlf.MCF10CA1A.MCF10A <- topDirs(qlf.MCF10CA1A.MCF10A, return_df = "pairedbed", p.adj_cutoff = 0.05)
 
 # should we output a list of qlf hicexp?
 
