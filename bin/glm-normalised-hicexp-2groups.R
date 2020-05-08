@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 #
 # hreyes April 2020
-# glm-normalized-hicexp-2groups.R
+# glm-normalised-hicexp-2groups.R
 #
 # Read in a normalized hicexp object and perform statistical testing
 #
