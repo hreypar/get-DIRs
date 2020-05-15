@@ -18,3 +18,10 @@ results/%.qlf.cycnorm.hicexp.Rds:	data/%.cycnorm.hicexp.Rds
 		--input $prereq \
 		--output $target
 
+# Produce Manhattan plots of the qlf comparisons.
+#
+results/%.pdf:	results/%.qlf.cycnorm.hicexp.Rds
+	bin/manhattan-hicexp.R \
+		--input $prereq \
+		--outputpath `dirname $target`
+
