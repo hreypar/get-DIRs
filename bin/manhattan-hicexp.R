@@ -16,7 +16,7 @@ options(scipen = 10)
 # it's dangerous to go alone! take this.
 
 produce_manhattan <- function(comparison) {
-  png(file = paste0(opt$outputpath, "/", gsub("\\.", "-", comparison), ".png"), 
+  png(file = paste0(dirname(args), "/", gsub("\\.", "-", comparison), ".png"), 
       height = 15, width = 30, units = "in", res = 500)
   
   manhattan_hicexp(hicexp = hicexp.comparison.list[[comparison]])
@@ -32,22 +32,9 @@ produce_manhattan <- function(comparison) {
 }
 #
 ########################## read in data ###################################
-option_list = list(
-  make_option(opt_str = c("-i", "--input"), 
-              type = "character",
-              help = "A list (Rds object) of hicexp objects that have been compared"),
-  make_option(opt_str = c("-o", "--outputpath"), 
-              type = "character", 
-              help = "filepath for output PDF")
-)
-opt <- parse_args(OptionParser(option_list=option_list))
+args = commandArgs(trailingOnly=TRUE)
 
-if (is.null(opt$input)){
-  print_help(OptionParser(option_list=option_list))
-  stop("The input file is mandatory.n", call.=FALSE)
-}
-
-hicexp.comparison.list <- readRDS(opt$input)
+hicexp.comparison.list <- readRDS(args)
 
 ########################## call plotting ###################################
 lapply(names(hicexp.comparison.list), produce_manhattan)
