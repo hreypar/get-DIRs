@@ -31,11 +31,11 @@ produce_manhattan <- function(comparison) {
   
   manhattan_hicexp(hicexp = hicexp.comparison.list[[comparison]])
   
-  title(main = gsub("\\.", " vs ", gsub("qlf.", "quasi-likelihood F-test ", comparison)),
-        cex.main = 3, sub = paste0("(", hicres, " resolution)"), cex.sub = 3)
+  title(main = paste(gsub("\\.", " vs ", gsub("qlf.", "quasi-likelihood F-test ", comparison)), 
+	paste0("(", hicres, " resolution)")), cex.main = 3)
 
-  abline(h = -log10(0.001), lwd=3, lty=2, col="deepskyblue")
-  abline(h = -log10(0.05), lwd=2.5, lty=2, col="blue")
+  abline(h = -log10(0.001), lwd=3, lty=2, col="blue")
+  abline(h = -log10(0.05), lwd=2.5, lty=2, col="deepskyblue")
   
   axis(side = 2, at = seq(from = 0, to = round(pq["100%"]), by = 1), las=1)
   
