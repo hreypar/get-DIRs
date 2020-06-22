@@ -8,7 +8,7 @@
 #
 #################### import libraries and set options ####################
 library(optparse)
-library(multiHiCcompare)
+suppressMessages(library(multiHiCcompare))
 library(BiocParallel)
 #
 options(scipen = 10)

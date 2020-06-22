@@ -8,7 +8,7 @@
 #
 # always bear in mind that this plots REGIONS (not PAIRS of regions)
 #################### import libraries and set options ####################
-library(multiHiCcompare)
+suppressMessages(library(multiHiCcompare))
 #
 options(scipen = 10)
 ########################## functions ###################################
