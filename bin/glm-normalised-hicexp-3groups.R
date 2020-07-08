@@ -7,14 +7,16 @@
 #
 #
 #################### import libraries and set options ####################
-library(optparse)
+suppressMessages(library(optparse))
 suppressMessages(library(multiHiCcompare))
-library(BiocParallel)
+suppressMessages(library(BiocParallel))
+message("\nRequired libraries have been loaded.")
 #
 options(scipen = 10)
 #
 cores = parallel::detectCores()
 register(MulticoreParam(workers = cores - 2), default = TRUE)
+message(paste(cores, "cores detected, using", cores-2))
 #
 ########################## functions ###################################
 # it's dangerous to go alone! take this.
@@ -50,6 +52,7 @@ if (is.null(opt$input)){
 }
 #
 the.hicexp <- readRDS(file = opt$input)
+message("The normalised hicexp has been loaded.")
 #
 ### check the hicesp actually has 3 groups 
 if (nlevels(meta(the.hicexp)$group) != 3) {
@@ -59,6 +62,7 @@ if (nlevels(meta(the.hicexp)$group) != 3) {
 ###################### infer model matrix ##########################
 # probably would be good to add covars if they exist
 modelmat <- model.matrix(~factor(meta(the.hicexp)$group))
+message("Model matrix for statistical test has been created.")
 #
 ###################### prepare qlf list ############################
 # group2 vs group1 coefficient
@@ -79,9 +83,13 @@ names(qlf.hicexp.list) <- c(paste("qlf", the.hicexp.groups[2], the.hicexp.groups
                             paste("qlf", the.hicexp.groups[3], the.hicexp.groups[1], sep = "."),
                             paste("qlf", the.hicexp.groups[3], the.hicexp.groups[2], sep = ".")
                           )
+message("The glm model has been created.")
 #
 ########################## perform glms #############################
 qlf.hicexp.list <- lapply(qlf.hicexp.list, FUN = hic_glm_3groups)
+message("The quasi likelihood F-test been performed.")
 
 ################ save qlf hicexp ################
 saveRDS(qlf.hicexp.list, file = opt$output)
+message("The list of hicexp objects including qlf test results has been saved as an Rds file.\n")
+
