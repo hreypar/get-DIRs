@@ -8,5 +8,6 @@ find -L data/ \
 	-name "*.cycnorm.hicexp.Rds" \
 | sed -r \
 	-e 's#^data/#results/#' \
-	-e 's#.cycnorm.hicexp.Rds$#.qlf.cycnorm.hicexp.Rds#'
+	-e 's#.cycnorm.hicexp.Rds$#.qlf.cycnorm.hicexp.Rds#'\
+| sort
 
