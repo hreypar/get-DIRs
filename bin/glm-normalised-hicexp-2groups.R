@@ -5,23 +5,18 @@
 #
 # Read in a normalized hicexp object and perform statistical testing
 #
-##########################################################################
-##########################################################################
-#
-# BEWARE THIS SCRIPT IS NOT FUNCTIONAL RIGHT NOW
-#
-##########################################################################
-##########################################################################
 #
 #################### import libraries and set options ####################
 library(optparse)
-library(multiHiCcompare)
+suppressMessages(library(multiHiCcompare))
 library(BiocParallel)
+message("\nRequired libraries have been loaded.")
 #
 options(scipen = 10)
 #
 cores = parallel::detectCores()
 register(MulticoreParam(workers = cores - 2), default = TRUE)
+message(paste(cores, "cores detected, using", cores-2))
 #
 ########################## read in data ###################################
 option_list = list(
@@ -41,7 +36,11 @@ if (is.null(opt$input)){
 }
 
 the.hicexp <- readRDS(file = opt$input)
-#
+message("The normalised hicexp has been loaded.")
+
+# check the hicexp actually has 2 groups 
+
+
 ###################### infer model matrix ###########################
 # probably would be good to add covars if they exist
 modelmat <- model.matrix(~factor(meta(the.hicexp)$group))
