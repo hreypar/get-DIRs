@@ -18,6 +18,16 @@ cores = parallel::detectCores()
 register(MulticoreParam(workers = cores - 2), default = TRUE)
 message(paste(cores, "cores detected, using", cores-2))
 #
+########################## functions ###################################
+# it's dangerous to go alone! take this.
+hic_glm_2groups <- function(g) {
+  
+  out <- hic_glm(hicexp = the.hicexp, design = modelmat, coef = g,
+                   method = "QLFTest", p.method = "fdr", parallel = TRUE)
+  
+  return(out)
+}
+#
 ########################## read in data ###################################
 option_list = list(
   make_option(opt_str = c("-i", "--input"), 
@@ -39,36 +49,35 @@ the.hicexp <- readRDS(file = opt$input)
 message("The normalised hicexp has been loaded.")
 
 # check the hicexp actually has 2 groups 
-
-
+if (nlevels(meta(the.hicexp)$group) != 2) {
+  stop("The normalized hicexp input file should contain 2 groups of samples.n", call.=FALSE)
+}
+#
 ###################### infer model matrix ###########################
 # probably would be good to add covars if they exist
 modelmat <- model.matrix(~factor(meta(the.hicexp)$group))
+message("Model matrix for statistical test has been created.")
 #
-###################### figure out groups ############################
-samples <- meta(the.hicexp)
+###################### prepare qlf list ############################
+# group2 vs group1 coefficient
+#
+qlf.hicexp.list <- list(2)
 
-unique(samples$group)
+#figure out groups
+the.hicexp.groups <- levels(meta(the.hicexp)$group)
 
+# set names for the comparison
+names(qlf.hicexp.list) <- paste("qlf", the.hicexp.groups[2], the.hicexp.groups[1], sep=".")
 
-########################## perform glm ##############################
+message("The glm model has been created.")
+#
+########################## perform glms #############################
 # Now, we've got different tests we want to perform... 
 
-qlf.MCF10AT1.MCF10A <- hic_glm(the.hicexp, design = modelmat, coef = 2,
-                   method = "QLFTest", p.method = "fdr", parallel = TRUE)
+qlf.hicexp.list <- lapply(qlf.hicexp.list, FUN = hic_glm_2groups)
+message("The quasi likelihood F-test been performed.")
 
-# filtering is being moved to a different module anyway
-top.qlf.MCF10AT1.MCF10A <- topDirs(qlf.MCF10AT1.MCF10A, return_df = "pairedbed", p.adj_cutoff = 0.05)
-
-
-#
-
-qlf.MCF10CA1A.MCF10A <- hic_glm(the.hicexp, design = modelmat, coef = 3,
-                                method = "QLFTest", p.method = "fdr", parallel = TRUE)
-
-top.qlf.MCF10CA1A.MCF10A <- topDirs(qlf.MCF10CA1A.MCF10A, return_df = "pairedbed", p.adj_cutoff = 0.05)
-
-# should we output a list of qlf hicexp?
 
 ################ save qlf hicexp ################
-saveRDS(the.hicexp, file = opt$output)
+saveRDS(qlf.hicexp.list, file = opt$output)
+message("The hicexp object with qlf test results has been saved as an Rds file.\n")
